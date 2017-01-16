@@ -8,7 +8,7 @@
 
 	<link href="static/css/bootstrap.css" rel="stylesheet"/>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="static/js/jquery-3.1.1.min.js"></script>
 	<script src="static/js/bootstrap.min.js"></script>
 	<script src="static/js/angular.js"></script>
 
@@ -24,7 +24,7 @@
 
 	myApp.factory("rpsDataSvc", function($http, $q) {
 		return {
-			getData: function(par) {				
+			getData: function(par) {
 				var deferred = $q.defer();
 				$http.get(url+par)
 					.success(function(data) {
@@ -79,10 +79,10 @@
 		$scope.makeMove = function() {
 
 			var move = $scope.playerMove;
-			
+
 			if(move){
 				rpsDataSvc.getData("play/" +  move).then(success, error);
-	
+
 				function success(response) {
 					$scope.Score = response;
 				}
@@ -95,7 +95,7 @@
 		}
 
 		$scope.displayScore = function() {
-			
+
 			rpsDataSvc.getData("score").then(success, error);
 
 			function success(response) {
@@ -105,9 +105,9 @@
 				console.log("error: ", e);
 			}
 		}
-		
+
 		$scope.resetScore = function() {
-			
+
 			rpsDataSvc.getData("reset").then(success, error);
 
 			function success(response) {
@@ -147,7 +147,7 @@
 		<div class="panel panel-primary" style="width: 65%;">
 			<div class="panel-heading"><span class="lead">Rulesets </span></div>
 			<div class="panel-body">
-	
+
 				<div ng-show="toggleRPSView">
 					<h3>Rock Paper Scissors</h3>
 					<ul>
@@ -180,12 +180,12 @@
 				<div class="panel panel-primary" style="width: 100%;">
 					<div class="panel-heading"><span class="lead">Let The Game Begins</span></div>
 					<div class="panel-body">
-	
+
 						  <form>
 							<div class="form-group">
 								<label for="playerMove">Make your move:</label>
 								<select ng-init="playerMove = playerMove || options[0].value" ng-model="playerMove" class="form-control" ng-required="true">
-								  <option value="">-- Select --</option>	
+								  <option value="">-- Select --</option>
 							      <option class="optionStyle" ng-repeat="(id,text) in moveOptions" value="{{id}}">{{text}}</option>
 							    </select>
 							</div>
@@ -207,7 +207,7 @@
 								<td>Player : </td>
 								<td>{{Score.playerScore}}</td>
 							  </tr>
-	
+
 							  <tr class="warning">
 								<td>AI : </td>
 								<td>{{Score.alScore}}</td>
@@ -215,7 +215,7 @@
 							</tbody>
 					  	</table>
 					  	<div class="form-group">
-							<button type="button" class="btn btn-primary" ng-click="resetScore()"> Reset Score</button>							
+							<button type="button" class="btn btn-primary" ng-click="resetScore()"> Reset Score</button>
 						</div>
 					</div>
 				</div>
