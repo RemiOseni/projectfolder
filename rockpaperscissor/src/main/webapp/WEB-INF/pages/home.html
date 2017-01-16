@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Rock Paper Scissors App</title>
+
+	<link href="static/css/bootstrap.css" rel="stylesheet"/>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="static/js/bootstrap.min.js"></script>
+	<script src="static/js/angular.js"></script>
+
+<script>
+
+(function() {
+	var name = "myApp",
+		requires = [],
+		url = "/rockpaperscissor/",
+		myApp = null;
+
+	myApp = angular.module(name, requires);
+
+	myApp.factory("rpsDataSvc", function($http, $q) {
+		return {
+			getData: function(par) {				
+				var deferred = $q.defer();
+				$http.get(url+par)
+					.success(function(data) {
+						deferred.resolve(data);
+					})
+					.error(function(data) {
+						console.error('Error while fetching data');
+						deferred.reject(data);
+					});
+				return deferred.promise;
+			}
+		}
+	});
+
+
+	myApp.controller("AppCtrl", function($scope, $http, rpsDataSvc){
+
+		// variables for toggling view states
+		$scope.toggleRPSView = true;
+		$scope.toggleRPSLSView = false;
+
+		$scope.Score;
+		$scope.moveOptions = [];
+
+		$scope.toggleRuleset = function() {
+			var type = $scope.gameType;
+			if(type == "rpsls"){
+				$scope.toggleRPSView = false;
+				$scope.toggleRPSLSView = true;
+				$scope.loadOptions('loadrpsls');
+			}
+			else{
+				$scope.toggleRPSView = true;
+				$scope.toggleRPSLSView = false;
+				$scope.loadOptions('loadrps');
+			}
+		}
+
+		// to load select options
+		$scope.loadOptions = function(par) {
+
+			rpsDataSvc.getData(par).then(success, error);
+
+			function success(response) {
+				$scope.moveOptions = response;
+			}
+			function error(e) {
+				console.log("error: ", e);
+			}
+		}
+
+		$scope.makeMove = function() {
+
+			var move = $scope.playerMove;
+			
+			if(move){
+				rpsDataSvc.getData("play/" +  move).then(success, error);
+	
+				function success(response) {
+					$scope.Score = response;
+				}
+				function error(e) {
+					console.log("error: ", e);
+				}
+			}else{
+				alert("Select your move");
+			}
+		}
+
+		$scope.displayScore = function() {
+			
+			rpsDataSvc.getData("score").then(success, error);
+
+			function success(response) {
+				$scope.Score = response;
+			}
+			function error(e) {
+				console.log("error: ", e);
+			}
+		}
+		
+		$scope.resetScore = function() {
+			
+			rpsDataSvc.getData("reset").then(success, error);
+
+			function success(response) {
+				$scope.Score = response;
+			}
+			function error(e) {
+				console.log("error: ", e);
+			}
+		}
+
+		$scope.loadOptions('loadrps');
+	});
+
+}());
+</script>
+
+</head>
+
+<body ng-controller="AppCtrl" >
+<div>
+	<div class="panel panel-primary" style="width: 90%;" >
+		<div class="panel-heading"><span class="lead">Rock Paper Scissors </span></div>
+
+		 <div class="panel-body">
+		 	<form class="form-inline">
+				<div class="form-group">
+					<label for="gameType" > Please select game type : </lable>
+					<select class="form-control" ng-model="gameType" ng-change="toggleRuleset()" >
+						<option value="">Rock Paper Scissors</option>
+						<option value="rpsls" >Rock Paper Scissors Lizard Spock</option>
+					</select>
+				</div>
+			</form>
+		</div>
+		<br>
+		<br>
+		<div class="panel panel-primary" style="width: 65%;">
+			<div class="panel-heading"><span class="lead">Rulesets </span></div>
+			<div class="panel-body">
+	
+				<div ng-show="toggleRPSView">
+					<h3>Rock Paper Scissors</h3>
+					<ul>
+						<li>There are 3 valid moves: Rock, Paper, Scissors</li>
+						<li>Rock breaks Scissors</li>
+						<li>Paper covers Rock</li>
+						<li>Scissors cut Paper</li>
+					</ul>
+				</div>
+				<div ng-show="toggleRPSLSView">
+					<h3>Rock Paper Scissors Lizard Spock</h3>
+					<ul>
+						<li>There are 3 valid moves: Rock, Paper, Scissors, Lizard, Spock</li>
+						<li>Rock breaks Scissors</li>
+						<li>Paper covers Rock</li>
+						<li>Scissors cut Paper</li>
+						<li>Spock vaporizes Rock</li>
+						<li>Lizard poisons Spock</li>
+						<li>Rock crushes Lizard</li>
+						<li>Scissors decapitate Lizard</li>
+						<li>Lizard eats Paper</li>
+						<li>Paper disproves Spock</li>
+						<li>Spock bends Scissors</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="row" >
+			<div class="col-md-4">
+				<div class="panel panel-primary" style="width: 100%;">
+					<div class="panel-heading"><span class="lead">Let The Game Begins</span></div>
+					<div class="panel-body">
+	
+						  <form>
+							<div class="form-group">
+								<label for="playerMove">Make your move:</label>
+								<select ng-init="playerMove = playerMove || options[0].value" ng-model="playerMove" class="form-control" ng-required="true">
+								  <option value="">-- Select --</option>	
+							      <option class="optionStyle" ng-repeat="(id,text) in moveOptions" value="{{id}}">{{text}}</option>
+							    </select>
+							</div>
+							<div class="form-group">
+							  <button type="button" class="btn btn-primary" ng-click="makeMove()"> Play !!</button>
+							  <label>{{Score.message}}</label>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="panel panel-primary" style="width: 100%;">
+					<div class="panel-heading"><span class="lead">Scores</span></div>
+					<div class="panel-body">
+					  	<table  class="table table-hover" >
+							<tbody>
+							  <tr class="success">
+								<td>Player : </td>
+								<td>{{Score.playerScore}}</td>
+							  </tr>
+	
+							  <tr class="warning">
+								<td>AI : </td>
+								<td>{{Score.alScore}}</td>
+							  </tr>
+							</tbody>
+					  	</table>
+					  	<div class="form-group">
+							<button type="button" class="btn btn-primary" ng-click="resetScore()"> Reset Score</button>							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<br>
+		<br>
+	</div>
+</div>
+</body>
+</html>
