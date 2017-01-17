@@ -2,6 +2,7 @@
  * 
  */
 package com.rockpaperscissor.model;
+import org.springframework.stereotype.Component;
 
 
 /**
