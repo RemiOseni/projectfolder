@@ -7,6 +7,7 @@ package com.rockpaperscissor.model;
  * @author RemiOseni
  *
  */
+@Component
 public class Score {
 	
 	private int gameNo;
