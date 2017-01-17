@@ -8,6 +8,7 @@ package com.rockpaperscissor.model;
  * @author RemiOseni
  *
  */
+@Component
 public class User {
 
 	public Move getMove(String selection) {
