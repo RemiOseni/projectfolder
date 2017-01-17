@@ -2,16 +2,17 @@ package com.rockpaperscissor.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rockpaperscissor.model.AIComputer;
+import com.rockpaperscissor.model.Move;
 import com.rockpaperscissor.model.Score;
-import com.rockpaperscissor.service.RPSService;
+import com.rockpaperscissor.model.User;
 
 /**
  * @author RemiOseni
@@ -21,13 +22,20 @@ import com.rockpaperscissor.service.RPSService;
 public class RPSRestController{
 	
 	@Autowired
-	RPSService rpsService;
+	private Score scoreBoard; 
 	
-	private boolean rpsFlag;
+	@Autowired
+	private User user;
+	
+	@Autowired
+	private AIComputer computer;
+	
+	private boolean rpsFlag = true;
 	
 	@RequestMapping(value = "/play/{playerChoice}", method = RequestMethod.GET, headers="Accept=application/json")
-	public Score play(@PathVariable String playerChoice){
-		return rpsService.playGame(playerChoice, rpsFlag);	
+	public Score play(@PathVariable String playerChoice){			
+		playGame(playerChoice);	
+		return scoreBoard;
 	}
 	
 	@RequestMapping(value="/loadrps", method=RequestMethod.GET , headers="Accept=application/json")
@@ -58,13 +66,48 @@ public class RPSRestController{
 		
 	@RequestMapping(value="/score",  method=RequestMethod.GET, headers="Accept=application/json")
 	public Score score(){	
-		return rpsService.getScoreBoard();		
+		return scoreBoard;		
 	}
 	
 	@RequestMapping(value="/reset",  method=RequestMethod.GET, headers="Accept=application/json")
 	public Score reset(){	
-		rpsService.setScoreBoard(new Score());
-		return rpsService.getScoreBoard();
+		return scoreBoard = new Score(); 		
 	}
+
+	
+	private void playGame(String personPlay){
+		
+		Random rand = new Random();
+		
+		 // Get moves
+        Move userMove = user.getMove(personPlay);
+        Move computerMove = computer.getMove( rand.nextInt(rpsFlag ? 3 : 5));
+       
+        // Compare moves and determine winner
+        int compareMoves = userMove.compareMoves(computerMove);
+        switch (compareMoves) {
+        case 0: // Tie
+            scoreBoard.setMessage("You and AI Computer tie !!");
+            break;
+        case 1: // User wins           
+            scoreBoard.setMessage(userMove + " beats " + computerMove + ". You won!");
+			scoreBoard.setPlayerScore(scoreBoard.getPlayerScore() + 1);
+            break;
+        case -1: // Computer wins            
+            scoreBoard.setMessage(computerMove + " beats " + userMove + ". You lost.");
+			scoreBoard.setAlScore(scoreBoard.getAlScore() + 1);
+            break;
+        }
+        
+        scoreBoard.setGameNo(scoreBoard.getGameNo() + 1);
+	}
+
+	public AIComputer getComputer() {
+		return computer;
+	}
+
+	public User getUser() {
+		return user;
+	}	
 
 }
